@@ -1,9 +1,6 @@
 package com.example.Phone.Pay.management.controller;
 
-import com.example.Phone.Pay.management.dto.AccountDto;
-import com.example.Phone.Pay.management.dto.GenericResponse;
-import com.example.Phone.Pay.management.dto.GitDto;
-import com.example.Phone.Pay.management.dto.UserDto;
+import com.example.Phone.Pay.management.dto.*;
 import com.example.Phone.Pay.management.service.ServiceInt;
 import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
@@ -14,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -87,10 +85,8 @@ public class Controller {
     public GenericResponse toMobileNumberTransferred(@RequestBody ToMobileNumber toMobileNumber){
         return serviceInt.toMobileNumberTransferred(toMobileNumber);
     }
-    @GetMapping("/get-all-git-logs/{repo}")
-    public List<GitDto> getAll(@PathVariable String repo) throws GitAPIException {
-        return serviceInt.getAll(repo);
+    @GetMapping("/get-all-git-logs")
+    public List<GitDto> getAll(@RequestBody RepoDto dto) throws GitAPIException, IOException {
+        return serviceInt.getAll(dto);
     }
-
-
-    }
+}

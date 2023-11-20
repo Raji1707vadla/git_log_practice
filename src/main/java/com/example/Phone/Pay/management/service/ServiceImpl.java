@@ -11,6 +11,7 @@ import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
 import com.example.Phone.Pay.management.usage_classes.ToMobileNumber;
 import com.nimbusds.jose.JOSEException;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -22,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -252,16 +255,16 @@ public class ServiceImpl implements ServiceInt {
     }
 
     @Override
-    public List<GitDto> getAll(String repoUrl) throws GitAPIException {
+    public List<GitDto> getAll(RepoDto repoDto) throws GitAPIException, IOException {
       // String repoUrl = "https://github.com/Raji1707vadla/git_log_practice.git";
-        try (Git git = cloneRepository(repoUrl)) {
+        try (Git git = cloneRepository(repoDto.getRepo())) {
             Iterable<RevCommit> commits = getCommits(git);
             List<GitDto> gitDtoList = new ArrayList<>();
             for (RevCommit commit : commits) {
                 GitDto dto = new GitDto();
                 String commitMessage = commit.getFullMessage();
                 String authorName = commit.getAuthorIdent().getName();
-                Date commitTime = new Date(commit.getCommitTime() * 1000L); // Convert seconds to milliseconds
+                Date commitTime = new Date(commit.getCommitTime() * 1000L);
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String formattedTime = dateFormat.format(commitTime);
@@ -275,9 +278,17 @@ public class ServiceImpl implements ServiceInt {
         }
     }
 
-    private  Git cloneRepository(String repoUrl) throws GitAPIException {
+    private  Git cloneRepository(String repoUrl) throws GitAPIException, IOException {
+        File localRepo = new File("git_log_practice");
+
+        // Delete the existing directory if it exists
+        if (localRepo.exists()) {
+            FileUtils.deleteDirectory(localRepo);
+        }
+
         CloneCommand cloneCommand = Git.cloneRepository()
                 .setURI(repoUrl);
+
         return cloneCommand.call();
     }
 
