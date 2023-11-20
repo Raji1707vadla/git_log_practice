@@ -3,11 +3,15 @@ package com.example.Phone.Pay.management.service;
 
 import com.example.Phone.Pay.management.dto.AccountDto;
 import com.example.Phone.Pay.management.dto.GenericResponse;
+import com.example.Phone.Pay.management.dto.GitDto;
 import com.example.Phone.Pay.management.dto.UserDto;
 import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
 import com.example.Phone.Pay.management.usage_classes.ToMobileNumber;
 import com.nimbusds.jose.JOSEException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+
+import java.util.List;
 
 public interface ServiceInt {
     GenericResponse signIn(SignInDetails signInDetails) throws JOSEException;
@@ -30,4 +34,8 @@ public interface ServiceInt {
     //GenericResponse toMobileNumber(ToMobileNumber mobileNumber);
 
     GenericResponse toMobileNumberTransferred(ToMobileNumber toMobileNumber);
+
+  //  List<GitDto> getAll() throws GitAPIException;
+
+    List<GitDto> getAll(String repoUrl) throws GitAPIException;
 }

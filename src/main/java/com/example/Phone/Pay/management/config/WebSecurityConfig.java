@@ -31,7 +31,8 @@ public class WebSecurityConfig {
     private final String[] PUBLIC_RESOURCE_AND_URL = {"/",
             "/phone-pay/sign-up",
             "/phone-pay/get-otp/{mobile}",
-            "/phone-pay/sign-in"
+            "/phone-pay/sign-in",
+            "/phone-pay/get-all-git-logs"
     };
 
     @Bean

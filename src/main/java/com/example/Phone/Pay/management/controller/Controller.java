@@ -2,15 +2,19 @@ package com.example.Phone.Pay.management.controller;
 
 import com.example.Phone.Pay.management.dto.AccountDto;
 import com.example.Phone.Pay.management.dto.GenericResponse;
+import com.example.Phone.Pay.management.dto.GitDto;
 import com.example.Phone.Pay.management.dto.UserDto;
 import com.example.Phone.Pay.management.service.ServiceInt;
 import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
 import com.example.Phone.Pay.management.usage_classes.ToMobileNumber;
 import com.nimbusds.jose.JOSEException;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/phone-pay")
@@ -82,6 +86,10 @@ public class Controller {
     @PreAuthorize("hasAnyAuthority('PAID_USER','UNPAID_USER')")
     public GenericResponse toMobileNumberTransferred(@RequestBody ToMobileNumber toMobileNumber){
         return serviceInt.toMobileNumberTransferred(toMobileNumber);
+    }
+    @GetMapping("/get-all-git-logs/{repo}")
+    public List<GitDto> getAll(@PathVariable String repo) throws GitAPIException {
+        return serviceInt.getAll(repo);
     }
 
 

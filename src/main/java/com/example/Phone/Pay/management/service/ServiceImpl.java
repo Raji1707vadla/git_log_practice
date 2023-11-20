@@ -1,10 +1,7 @@
 package com.example.Phone.Pay.management.service;
 
 import com.example.Phone.Pay.management.config.JwtTokenUtils;
-import com.example.Phone.Pay.management.dto.AccountDto;
-import com.example.Phone.Pay.management.dto.GenericResponse;
-import com.example.Phone.Pay.management.dto.SignInResponseDto;
-import com.example.Phone.Pay.management.dto.UserDto;
+import com.example.Phone.Pay.management.dto.*;
 import com.example.Phone.Pay.management.entity.Account;
 import com.example.Phone.Pay.management.entity.User;
 import com.example.Phone.Pay.management.repo.AccountRepo;
@@ -14,6 +11,10 @@ import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
 import com.example.Phone.Pay.management.usage_classes.ToMobileNumber;
 import com.nimbusds.jose.JOSEException;
+import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -21,9 +22,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class ServiceImpl implements ServiceInt {
@@ -251,5 +251,38 @@ public class ServiceImpl implements ServiceInt {
        return new GenericResponse(HttpStatus.OK.value(), "sent successfully");
     }
 
+    @Override
+    public List<GitDto> getAll(String repoUrl) throws GitAPIException {
+      // String repoUrl = "https://github.com/Raji1707vadla/git_log_practice.git";
+        try (Git git = cloneRepository(repoUrl)) {
+            Iterable<RevCommit> commits = getCommits(git);
+            List<GitDto> gitDtoList = new ArrayList<>();
+            for (RevCommit commit : commits) {
+                GitDto dto = new GitDto();
+                String commitMessage = commit.getFullMessage();
+                String authorName = commit.getAuthorIdent().getName();
+                Date commitTime = new Date(commit.getCommitTime() * 1000L); // Convert seconds to milliseconds
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String formattedTime = dateFormat.format(commitTime);
+
+                dto.setUserName(authorName);
+                dto.setCommitMessage(commitMessage);
+                dto.setCommitTime(formattedTime);
+                gitDtoList.add(dto);
+            }
+            return gitDtoList;
+        }
+    }
+
+    private  Git cloneRepository(String repoUrl) throws GitAPIException {
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setURI(repoUrl);
+        return cloneCommand.call();
+    }
+
+    private  Iterable<RevCommit> getCommits(Git git) throws GitAPIException {
+        return git.log().call();
+    }
 
 }
