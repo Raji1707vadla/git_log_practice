@@ -266,9 +266,9 @@ public class ServiceImpl implements ServiceInt {
     @Override
     public List<GitDto> getAll(RepoDto repoDto) throws GitAPIException, IOException {
         try (Git git = cloneRepository(repoDto.getRepo())) {
-            Iterable<RevCommit> commits = getCommits(git);
+      //      Iterable<RevCommit> commits = getCommits(git);
             List<GitDto> gitDtoList = new ArrayList<>();
-            for (RevCommit commit : commits) {
+         /*   for (RevCommit commit : commits) {
                 GitDto dto = new GitDto();
                 String commitMessage = commit.getFullMessage();
                 String authorName = commit.getAuthorIdent().getName();
@@ -281,7 +281,7 @@ public class ServiceImpl implements ServiceInt {
                 dto.setCommitMessage(commitMessage);
                 dto.setCommitTime(formattedTime);
                 gitDtoList.add(dto);
-            }
+            }*/
             return gitDtoList;
         }
     }
@@ -300,8 +300,10 @@ public class ServiceImpl implements ServiceInt {
         return cloneCommand.call();
     }
 
+/*
     private Iterable<RevCommit> getCommits(Git git) throws GitAPIException {
         return git.log().call();
     }
+*/
 
 }
