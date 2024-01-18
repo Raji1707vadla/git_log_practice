@@ -55,7 +55,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                     return "Merge conflicts detected. Please resolve conflicts before merging.";
                 } else if (mergeResult.getMergeStatus().isSuccessful()) {
                     git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword())).setRemote("origin").setRefSpecs(new RefSpec(toBranch + ":" + toBranch)).call();
-                    return "Successfully Merged and Pushed";
+                    return "Successfully Merged and Pushed Code Code";
                 } else {
                     return "Merge Failed";
                 }
