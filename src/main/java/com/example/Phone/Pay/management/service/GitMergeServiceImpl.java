@@ -24,9 +24,10 @@ public class GitMergeServiceImpl implements GitMergeService{
     @Override
     public String mergeBranches(GitCredentialsDto gitCredentialsDto) {
         try {
-            if (Boolean.FALSE.equals(checkReadAccess(gitCredentialsDto)) ){
+            if (Boolean.FALSE.equals(checkReadAccess(gitCredentialsDto))) {
                 return "You don't have read access to the repository.";
             }
+
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 Repository repository = git.getRepository();
                 System.out.println("Source Branch: " + gitCredentialsDto.getSourceBranch());
@@ -44,16 +45,14 @@ public class GitMergeServiceImpl implements GitMergeService{
                 MergeResult mergeResult = git.merge().include(repository.resolve(gitCredentialsDto.getSourceBranch())).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
                 System.out.println("Merge Status: " + mergeResult.getMergeStatus());
                 System.out.println("Conflicts: " + mergeResult.getConflicts());
-                System.out.println("Conflicts Occured:"+"Conflicts Occured:"+"findAllByIdInAndServiceProviderId");
-                if (mergeResult.getMergeStatus().isSuccessful()) {
+                if (mergeResult.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
+                    System.out.println("Merge conflicts detected. Please resolve conflicts before merging.");
+                    return "Merge conflicts detected. Please resolve conflicts before merging.";
+                } else if (mergeResult.getMergeStatus().isSuccessful()) {
                     System.out.println("Merge successful");
                     git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword())).setRemote("origin").setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch())).call();
                     System.out.println("Push successful");
-                    System.out.println("Successfully Merged and Pushed");
                     return "Successfully Merged and Pushed";
-                } else if (mergeResult.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
-                    System.out.println("Merge conflicts detected. Please resolve conflicts before merging.");
-                    return "Merge conflicts detected. Please resolve conflicts before merging.";
                 } else {
                     System.out.println("Merge failed");
                     return "Merge Failed";
@@ -64,6 +63,7 @@ public class GitMergeServiceImpl implements GitMergeService{
             return "Sorry, something went wrong";
         }
     }
+
 
 /*    public String mergeBranches(GitCredentialsDto gitCredentialsDto) {
         try {
