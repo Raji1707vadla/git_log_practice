@@ -31,16 +31,9 @@ public class GitMergeServiceImpl implements GitMergeService{
 
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 Repository repository = git.getRepository();
-
                 String fromBranch = gitCredentialsDto.getFromBranch();
                 String toBranch = gitCredentialsDto.getToBranch();
-
-                // Fetch updates from the specific remote branch
-                git.fetch()
-                        .setRemote("origin")  // Replace with your remote name if different
-                        .setRefSpecs(new RefSpec("refs/heads/"+fromBranch + ":" + "refs/heads/"+toBranch))
-                        .call();
-
+                git.fetch().setRemote("origin").setRefSpecs(new RefSpec("refs/heads/"+fromBranch + ":" + "refs/heads/"+toBranch)).call();
                 Ref sourceRef = repository.findRef("refs/heads/" + fromBranch);
                 if (sourceRef == null) {
                     return "Source branch does not exist: " + fromBranch;
