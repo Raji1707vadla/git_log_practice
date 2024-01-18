@@ -33,9 +33,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                 Repository repository = git.getRepository();
 
                 // Fetch updates from the remote branch
-                git.fetch()
-                        .setRemote("origin")
-                        .setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch()))
+                git.fetch().setRemote("origin").setRefSpecs(new RefSpec("refs/heads/"+gitCredentialsDto.getTargetBranch() + ":" + "refs/heads/"+gitCredentialsDto.getTargetBranch()))
                         .call();
 
                 Ref sourceRef = repository.findRef("refs/heads/" + gitCredentialsDto.getSourceBranch());
@@ -66,7 +64,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                             .call();
                     return "Successfully Merged and Pushed";
                 } else {
-                    return "Merge Failed";
+                    return "Not Mergble";
                 }
             }
         } catch (Exception e) {
