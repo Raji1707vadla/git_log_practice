@@ -44,7 +44,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                 MergeResult mergeResult = git.merge().include(repository.resolve(gitCredentialsDto.getSourceBranch())).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
                 System.out.println("Merge Status: " + mergeResult.getMergeStatus());
                 System.out.println("Conflicts: " + mergeResult.getConflicts());
-                System.out.println("Conflicts Occured:"+"Conflicts Occured:");
+                System.out.println("Conflicts Occured:"+"Conflicts Occured:"+"findAllByIdInAndServiceProviderId");
                 if (mergeResult.getMergeStatus().isSuccessful()) {
                     System.out.println("Merge successful");
                     git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword())).setRemote("origin").setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch())).call();
