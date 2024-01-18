@@ -80,6 +80,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                 return true;
             }
         } catch (Exception e) {
+            // checking with conflicts
             if (e.getMessage().contains("Authentication is required")) {
                 System.out.println("Authentication error: You don't have read access.");
             } else {
