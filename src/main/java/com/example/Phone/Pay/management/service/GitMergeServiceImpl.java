@@ -38,9 +38,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                     System.out.println("Target branch does not exist: " + gitCredentialsDto.getTargetBranch());
                     return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
                 }
-
-                git.checkout().setName(gitCredentialsDto.getTargetBranch()).call();
-
+             //   git.checkout().setName(gitCredentialsDto.getTargetBranch()).call();
                 MergeResult mergeResult = git.merge()
                         .include(repository.resolve(gitCredentialsDto.getSourceBranch()))
                         .setCommit(true)
