@@ -288,15 +288,10 @@ public class ServiceImpl implements ServiceInt {
 
     private Git cloneRepository(String repoUrl) throws GitAPIException, IOException {
         File localRepo = new File("git_log_practice");
-
-        // Delete the existing directory if it exists
         if (localRepo.exists()) {
             FileUtils.deleteDirectory(localRepo);
         }
-
-        CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(repoUrl);
-
+        CloneCommand cloneCommand = Git.cloneRepository().setURI(repoUrl);
         return cloneCommand.call();
     }
 
