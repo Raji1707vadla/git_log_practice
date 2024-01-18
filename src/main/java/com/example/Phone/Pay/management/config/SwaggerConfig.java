@@ -1,21 +1,15 @@
 package com.example.Phone.Pay.management.config;
 
+
+import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.ResponseEntity;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.SecurityReference;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spi.service.contexts.SecurityContext;
-import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.info.License;
+
 
 /**
  * @Author ➤➤➤ Rajeswari
@@ -27,38 +21,20 @@ import java.util.List;
 @EnableSwagger2
 public class SwaggerConfig {
 
-    public static final String AUTH_HEADER_NAME = "Authorization";
-
-    ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("Phone Pay API").description("API Reference").version("2.0.0").build();
-    }
-
     @Bean
-    public Docket customImplementation() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .securityContexts(Collections.singletonList(securityContext()))
-                .securitySchemes(Collections.singletonList(apiKey()))
-                .select()
-                .paths(PathSelectors.any())
-                .apis(RequestHandlerSelectors.basePackage("com.example.Phone.Pay.management"))
-                .build()
-                .pathMapping("/").useDefaultResponseMessages(false).directModelSubstitute(LocalDate.class, String.class)
-                .genericModelSubstitutes(ResponseEntity.class);
+    public OpenAPI phonePayApi() {
+        return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList( "Authorization"))
+                .components(new Components()
+                        .addSecuritySchemes( "Authorization",
+                                new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
+                .info(apiInfo());
     }
 
-    private ApiKey apiKey() {
-        return new ApiKey("JWT", AUTH_HEADER_NAME, "header");
-    }
-
-    private SecurityContext securityContext() {
-        return SecurityContext.builder().securityReferences(defaultAuth()).build();
-    }
-
-    private List<SecurityReference> defaultAuth() {
-        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
-        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-        authorizationScopes[0] = authorizationScope;
-        return List.of(new SecurityReference("JWT", authorizationScopes));
+    private Info apiInfo() {
+        return new Info().title("PhonePayManagement API")
+                .description("PhonePayManagementApplication")
+                .version("v.1")
+                .license(new License().name("Apache").url(""));
     }
 }

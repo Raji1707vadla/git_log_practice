@@ -17,8 +17,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class GitCredentialsDto {
     private String repository;
-    private String sourceBranch;
-    private String targetBranch;
+    private String fromBranch;
+    private String toBranch;
     private String userName;
     private String password;
 }

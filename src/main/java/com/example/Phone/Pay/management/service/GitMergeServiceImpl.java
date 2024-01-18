@@ -21,173 +21,59 @@ import java.util.List;
  */
 @Service
 public class GitMergeServiceImpl implements GitMergeService{
+
     @Override
     public String mergeBranches(GitCredentialsDto gitCredentialsDto) {
         try {
-            if (Boolean.FALSE.equals(checkReadAccess(gitCredentialsDto)) ){
+            if (Boolean.FALSE.equals(checkReadAccess(gitCredentialsDto))) {
                 return "You don't have read access to the repository.";
             }
+
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 Repository repository = git.getRepository();
-                System.out.println("Source Branch: " + gitCredentialsDto.getSourceBranch());
-                System.out.println("Target Branch: " + gitCredentialsDto.getTargetBranch());
-                Ref sourceRef = repository.findRef("refs/heads/" + gitCredentialsDto.getSourceBranch());
+
+                String fromBranch = gitCredentialsDto.getFromBranch();
+                String toBranch = gitCredentialsDto.getToBranch();
+
+                // Fetch updates from the specific remote branch
+                git.fetch()
+                        .setRemote("origin")  // Replace with your remote name if different
+                        .setRefSpecs(new RefSpec("refs/heads/"+fromBranch + ":" + "refs/heads/"+toBranch))
+                        .call();
+
+                Ref sourceRef = repository.findRef("refs/heads/" + fromBranch);
                 if (sourceRef == null) {
-                    System.out.println("Source branch does not exist: " + gitCredentialsDto.getSourceBranch());
-                    return "Source branch does not exist: " + gitCredentialsDto.getSourceBranch();
+                    return "Source branch does not exist: " + fromBranch;
                 }
-                Ref targetRef = repository.findRef("refs/heads/" + gitCredentialsDto.getTargetBranch());
+
+                Ref targetRef = repository.findRef("refs/heads/" + toBranch);
                 if (targetRef == null) {
-                    System.out.println("Target branch does not exist: " + gitCredentialsDto.getTargetBranch());
-                    return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
+                    return "Target branch does not exist: " + toBranch;
                 }
-                MergeResult mergeResult = git.merge().include(repository.resolve(gitCredentialsDto.getSourceBranch())).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
-                System.out.println("Merge Status: " + mergeResult.getMergeStatus());
-                System.out.println("Conflicts: " + mergeResult.getConflicts());
-                System.out.println("Conflicts Occured:" +"Conflicts Occured:");
-                if (mergeResult.getMergeStatus().isSuccessful()) {
-                    System.out.println("Merge successful");
-                    git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword())).setRemote("origin").setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch())).call();
-                    System.out.println("Push successful");
-                    System.out.println("Successfully Merged and Pushed");
-                    return "Successfully Merged and Pushed";
-                } else if (mergeResult.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
-                    System.out.println("Merge conflicts detected. Please resolve conflicts before merging.");
+                MergeResult mergeResult = git.merge().include(repository.resolve(fromBranch)).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
+                if (mergeResult.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
                     return "Merge conflicts detected. Please resolve conflicts before merging.";
+                } else if (mergeResult.getMergeStatus().isSuccessful()) {
+                    git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword())).setRemote("origin").setRefSpecs(new RefSpec(toBranch + ":" + toBranch)).call();
+                    return "Successfully Merged and Pushed";
                 } else {
-                    System.out.println("Merge failed");
                     return "Merge Failed";
                 }
+            }catch (Exception e){
+                return "You Don't have access";
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return "Sorry, something went wrong";
+            return "Please Commit Your Changes Before pull.";
         }
     }
-
-/*    public String mergeBranches(GitCredentialsDto gitCredentialsDto) {
-        try {
-            try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
-
-                System.out.println("Hi Raju Good Morning");
-                Repository repository = git.getRepository();
-
-                System.out.println("Source Branch: " + gitCredentialsDto.getSourceBranch());
-                System.out.println("Target Branch: " + gitCredentialsDto.getTargetBranch());
-
-                Ref sourceRef = repository.findRef("refs/heads/" + gitCredentialsDto.getSourceBranch());
-                if (sourceRef == null) {
-                    System.out.println("Source branch does not exist: " + gitCredentialsDto.getSourceBranch());
-                    return "Source branch does not exist: " + gitCredentialsDto.getSourceBranch();
-                }
-
-                Ref targetRef = repository.findRef("refs/heads/" + gitCredentialsDto.getTargetBranch());
-                if (targetRef == null) {
-                    System.out.println("Target branch does not exist: " + gitCredentialsDto.getTargetBranch());
-                    return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
-                }
-
-                MergeResult mergeResult = git.merge()
-                        .include(repository.resolve(gitCredentialsDto.getSourceBranch()))
-                        .setCommit(true)
-                        .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                        .call();
-
-                System.out.println("Merge Status: " + mergeResult.getMergeStatus());
-                System.out.println("Conflicts: " + mergeResult.getConflicts());
-
-                if (mergeResult.getMergeStatus().isSuccessful()) {
-                    System.out.println("Merge successful");
-
-                    // Push changes to the target branch
-                    git.push()
-                            .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword()))
-                            .setRemote("origin")
-                            .setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch()))
-                            .call();
-
-                    System.out.println("Push successful");
-                    return "Successfully Merged and Pushed";
-                } else {
-                    System.out.println("Merge failed");
-                    return "Merge Failed";
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "Sorry, something went wrong";
-    }*/
-
-/*    public String mergeBranches(GitCredentialsDto gitCredentialsDto) {
-        try {
-            if (!checkReadAccess(gitCredentialsDto)) {
-                return "You don't have read access to the repository.";
-            }
-
-            try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
-                Repository repository = git.getRepository();
-
-                System.out.println("Source Branch: " + gitCredentialsDto.getSourceBranch());
-                System.out.println("Target Branch: " + gitCredentialsDto.getTargetBranch());
-
-                Ref sourceRef = repository.findRef("refs/heads/" + gitCredentialsDto.getSourceBranch());
-                if (sourceRef == null) {
-                    System.out.println("Source branch does not exist: " + gitCredentialsDto.getSourceBranch());
-                    return "Source branch does not exist: " + gitCredentialsDto.getSourceBranch();
-                }
-
-                Ref targetRef = repository.findRef("refs/heads/" + gitCredentialsDto.getTargetBranch());
-                if (targetRef == null) {
-                    System.out.println("Target branch does not exist: " + gitCredentialsDto.getTargetBranch());
-                    return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
-                }
-
-                MergeResult mergeResult = git.merge()
-                        .include(repository.resolve(gitCredentialsDto.getSourceBranch()))
-                        .setCommit(true)
-                        .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                        .call();
-
-                System.out.println("Merge Status: " + mergeResult.getMergeStatus());
-                System.out.println("Conflicts: " + mergeResult.getConflicts());
-
-                if (mergeResult.getMergeStatus().isSuccessful()) {
-                    System.out.println("Merge successful");
-                    git.push()
-                            .setCredentialsProvider(new UsernamePasswordCredentialsProvider("your_username", "your_password"))
-                            .setRemote("origin")
-                            .setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch()))
-                            .call();
-
-                    System.out.println("Push successful");
-                    return "Successfully Merged and Pushed";
-                } else {
-                    System.out.println("Merge failed");
-                    return "Merge Failed";
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Sorry, something went wrong";
-        }
-    }*/
 
     private boolean checkReadAccess(GitCredentialsDto gitCredentialsDto) {
         try {
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 List<Ref> branches = git.branchList().call();
-                System.out.println("Read access successful");
                 return true;
             }
         } catch (Exception e) {
-            if (e.getMessage().contains("Authentication is required")) {
-                System.out.println("Authentication error: You don't have read access.");
-            } else {
-                System.out.println("An error occurred: " + e.getMessage());
-            }
             return false;
         }
     }
