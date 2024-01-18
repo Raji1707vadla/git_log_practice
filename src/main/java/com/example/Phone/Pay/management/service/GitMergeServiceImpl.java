@@ -32,60 +32,48 @@ public class GitMergeServiceImpl implements GitMergeService{
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 Repository repository = git.getRepository();
 
-                // Fetch updates from the remote branch
-                git.fetch().setRemote("origin").setRefSpecs(new RefSpec("refs/heads/"+gitCredentialsDto.getTargetBranch() + ":" + "refs/heads/"+gitCredentialsDto.getTargetBranch()))
+                String fromBranch = gitCredentialsDto.getFromBranch();
+                String toBranch = gitCredentialsDto.getToBranch();
+
+                // Fetch updates from the specific remote branch
+                git.fetch()
+                        .setRemote("origin")  // Replace with your remote name if different
+                        .setRefSpecs(new RefSpec("refs/heads/"+fromBranch + ":" + "refs/heads/"+toBranch))
                         .call();
 
-                Ref sourceRef = repository.findRef("refs/heads/" + gitCredentialsDto.getSourceBranch());
+                Ref sourceRef = repository.findRef("refs/heads/" + fromBranch);
                 if (sourceRef == null) {
-                    return "Source branch does not exist: " + gitCredentialsDto.getSourceBranch();
+                    return "Source branch does not exist: " + fromBranch;
                 }
 
-                Ref targetRef = repository.findRef("refs/heads/" + gitCredentialsDto.getTargetBranch());
+                Ref targetRef = repository.findRef("refs/heads/" + toBranch);
                 if (targetRef == null) {
-                    return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
+                    return "Target branch does not exist: " + toBranch;
                 }
-
-                // Merge the changes from the source branch
-                MergeResult mergeResult = git.merge()
-                        .include(repository.resolve(gitCredentialsDto.getSourceBranch()))
-                        .setCommit(true)
-                        .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                        .call();
-
+                MergeResult mergeResult = git.merge().include(repository.resolve(fromBranch)).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
                 if (mergeResult.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
                     return "Merge conflicts detected. Please resolve conflicts before merging.";
                 } else if (mergeResult.getMergeStatus().isSuccessful()) {
-                    // If merge is successful, push the changes
-                    git.push()
-                            .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword()))
-                            .setRemote("origin")
-                            .setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch()))
-                            .call();
+                    git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword())).setRemote("origin").setRefSpecs(new RefSpec(toBranch + ":" + toBranch)).call();
                     return "Successfully Merged and Pushed";
                 } else {
-                    return "Not Mergble";
+                    return "Merge Failed";
                 }
+            }catch (Exception e){
+                return "You Don't have access";
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return "Sorry, something went wrong";
+            return "Please Commit Your Changes Before pull.";
         }
     }
+
     private boolean checkReadAccess(GitCredentialsDto gitCredentialsDto) {
         try {
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 List<Ref> branches = git.branchList().call();
-                System.out.println("Read access successful");
                 return true;
             }
         } catch (Exception e) {
-            // checking with conflicts
-            if (e.getMessage().contains("Authentication is required")) {
-                System.out.println("Authentication error: You don't have read access.");
-            } else {
-                System.out.println("An error occurred: " + e.getMessage());
-            }
             return false;
         }
     }
