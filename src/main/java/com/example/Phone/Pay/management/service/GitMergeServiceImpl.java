@@ -52,18 +52,9 @@ public class GitMergeServiceImpl implements GitMergeService{
             return "Sorry, something went wrong";
         }*/
         try {
-            if (Boolean.FALSE.equals(checkReadAccess(gitCredentialsDto))) {
-                return "You don't have read access to the repository.";
-            }
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
                 Repository repository = git.getRepository();
-
-                // Fetch updates from the remote branch
-                git.fetch()
-                        .setRemote("origin")
-                        .setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch()))
-                        .call();
-
+                git.fetch().setRemote("origin").setRefSpecs(new RefSpec(gitCredentialsDto.getTargetBranch() + ":" + gitCredentialsDto.getTargetBranch())).call();
                 Ref sourceRef = repository.findRef("refs/heads/" + gitCredentialsDto.getSourceBranch());
                 if (sourceRef == null) {
                     return "Source branch does not exist: " + gitCredentialsDto.getSourceBranch();
@@ -72,18 +63,10 @@ public class GitMergeServiceImpl implements GitMergeService{
                 if (targetRef == null) {
                     return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
                 }
-
-                // Merge the changes from the source branch
-                MergeResult mergeResult = git.merge()
-                        .include(repository.resolve(gitCredentialsDto.getSourceBranch()))
-                        .setCommit(true)
-                        .setFastForward(MergeCommand.FastForwardMode.NO_FF)
-                        .call();
-
+                MergeResult mergeResult = git.merge().include(repository.resolve(gitCredentialsDto.getSourceBranch())).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
                 if (mergeResult.getMergeStatus().equals(MergeResult.MergeStatus.CONFLICTING)) {
                     return "Merge conflicts detected. Please resolve conflicts before merging.";
                 } else if (mergeResult.getMergeStatus().isSuccessful()) {
-                    // If merge is successful, push the changes
                     git.push()
                             .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitCredentialsDto.getUserName(), gitCredentialsDto.getPassword()))
                             .setRemote("origin")
