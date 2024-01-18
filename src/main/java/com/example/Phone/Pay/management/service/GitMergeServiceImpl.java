@@ -39,7 +39,7 @@ public class GitMergeServiceImpl implements GitMergeService{
                 }
                 Ref targetRef = repository.findRef("refs/heads/" + gitCredentialsDto.getTargetBranch());
                 if (targetRef == null) {
-                    System.out.println("Target branch does not exist: " + gitCredentialsDto.getTargetBranch());
+                    System.out.println("Target branch does not exist:  " + gitCredentialsDto.getTargetBranch()+"Please Check");
                     return "Target branch does not exist: " + gitCredentialsDto.getTargetBranch();
                 }
                 MergeResult mergeResult = git.merge().include(repository.resolve(gitCredentialsDto.getSourceBranch())).setCommit(true).setFastForward(MergeCommand.FastForwardMode.NO_FF).call();
