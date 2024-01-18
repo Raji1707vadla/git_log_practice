@@ -1,5 +1,4 @@
 package com.example.Phone.Pay.management.service;
-
 import com.example.Phone.Pay.management.config.JwtTokenUtils;
 import com.example.Phone.Pay.management.dto.*;
 import com.example.Phone.Pay.management.entity.Account;
@@ -169,19 +168,24 @@ public class ServiceImpl implements ServiceInt {
     }
 
 
-
     @Override
     public GenericResponse toSelfTransfer(SelfTransfer selfTransfer) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (user.getAccountList().stream().noneMatch(e->e.getAccountNumber().equals(selfTransfer.getAccountFrom())||e.getAccountNumber().equals(selfTransfer.getAccountTo()))){
+        if (user.getAccountList().stream().noneMatch(e -> e.getAccountNumber().equals(selfTransfer.getAccountFrom()) || e.getAccountNumber().equals(selfTransfer.getAccountTo()))) {
             return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "no account found");
-        } else if (user.getAccountList().stream().filter(e->e.getAccountNumber().equals(selfTransfer.getAccountFrom())).findFirst().get().getBalance()<selfTransfer.getAmount()){
-             return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "insufficient funds");
-        } else if (user.getAccountList().stream().filter(e->e.getAccountNumber().equals(selfTransfer.getAccountFrom())).findFirst().get().getPin().equals(selfTransfer.getPin())){
+        } else if (user.getAccountList().stream().filter(e -> e.getAccountNumber().equals(selfTransfer.getAccountFrom())).findFirst().get().getBalance() < selfTransfer.getAmount()) {
+            return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "insufficient funds");
+        } else if (user.getAccountList().stream().filter(e -> e.getAccountNumber().equals(selfTransfer.getAccountFrom())).findFirst().get().getPin().equals(selfTransfer.getPin())) {
             return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "wrong pin");
         }
-        user.setAccountList(user.getAccountList().stream().peek(e->{if (e.getAccountNumber().equals(selfTransfer.getAccountFrom())) e.setBalance(e.getBalance()-selfTransfer.getAmount());else if (e.getAccountNumber().equals(selfTransfer.getAccountTo())) {e.setBalance(e.getBalance()+selfTransfer.getAmount());}}).toList());
-        return new GenericResponse(HttpStatus.OK.value(),"success");
+        user.setAccountList(user.getAccountList().stream().peek(e -> {
+            if (e.getAccountNumber().equals(selfTransfer.getAccountFrom()))
+                e.setBalance(e.getBalance() - selfTransfer.getAmount());
+            else if (e.getAccountNumber().equals(selfTransfer.getAccountTo())) {
+                e.setBalance(e.getBalance() + selfTransfer.getAmount());
+            }
+        }).toList());
+        return new GenericResponse(HttpStatus.OK.value(), "success");
 
        /* Account fromAccount = accountRepo.findByUserAndAccountNumber(user, selfTransfer.getAccountFrom());
         Account toAccount = accountRepo.findByUserAndAccountNumber(user, selfTransfer.getAccountTo());
@@ -199,13 +203,13 @@ public class ServiceImpl implements ServiceInt {
         } else return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "source account not found");*/
     }
 
-    @Override                
+    @Override
     public GenericResponse setDefaultAccount(String accountNumber) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (user.getAccountList().stream().noneMatch(e -> e.getAccountNumber().equals(accountNumber))) {
             return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "no account found");
         }
-            user.setAccountList(user.getAccountList().stream().peek(e -> {
+        user.setAccountList(user.getAccountList().stream().peek(e -> {
             if (e.getAccountNumber().equals(accountNumber)) e.setStatus("default");
             else e.setStatus("not-default");
         }).toList());
@@ -241,22 +245,26 @@ public class ServiceImpl implements ServiceInt {
     @Override
     public GenericResponse toMobileNumberTransferred(ToMobileNumber toMobileNumber) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userRepo.findByMobile(toMobileNumber.getMobileNo())==null) return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "no user found with mobile");
-        if (user.getAccountList().size()==0) return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "u didn't have account"  );
-        if (userRepo.findByMobile(toMobileNumber.getMobileNo()).getAccountList().size()==0) return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "receiver didn't have account"  );
-        Account fromAccount=accountRepo.findByUserAndAccountNumber(user,toMobileNumber.getAccountNumber());
-        if (!fromAccount.getPin().equals(Base64.getEncoder().encodeToString(toMobileNumber.getPin().getBytes()))) return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "wrong pin");
-        Account toAccount=userRepo.findByMobile(toMobileNumber.getMobileNo()).getAccountList().stream().filter(e->e.getStatus().equalsIgnoreCase("default")).findFirst().get();
-        if (fromAccount.getBalance()<toMobileNumber.getBalance()) return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "insufficient funds");
-        fromAccount.setBalance(fromAccount.getBalance()-toMobileNumber.getBalance());
-        toAccount.setBalance(toAccount.getBalance()+toMobileNumber.getBalance());
-       accountRepo.saveAll(List.of(fromAccount,toAccount));
-       return new GenericResponse(HttpStatus.OK.value(), "sent successfully");
+        if (userRepo.findByMobile(toMobileNumber.getMobileNo()) == null)
+            return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "no user found with mobile");
+        if (user.getAccountList().isEmpty())
+            return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "u didn't have account");
+        if (userRepo.findByMobile(toMobileNumber.getMobileNo()).getAccountList().isEmpty())
+            return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "receiver didn't have account");
+        Account fromAccount = accountRepo.findByUserAndAccountNumber(user, toMobileNumber.getAccountNumber());
+        if (!fromAccount.getPin().equals(Base64.getEncoder().encodeToString(toMobileNumber.getPin().getBytes())))
+            return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "wrong pin");
+        Account toAccount = userRepo.findByMobile(toMobileNumber.getMobileNo()).getAccountList().stream().filter(e -> e.getStatus().equalsIgnoreCase("default")).findFirst().get();
+        if (fromAccount.getBalance() < toMobileNumber.getBalance())
+            return new GenericResponse(HttpStatus.BAD_REQUEST.value(), "insufficient funds");
+        fromAccount.setBalance(fromAccount.getBalance() - toMobileNumber.getBalance());
+        toAccount.setBalance(toAccount.getBalance() + toMobileNumber.getBalance());
+        accountRepo.saveAll(List.of(fromAccount, toAccount));
+        return new GenericResponse(HttpStatus.OK.value(), "sent successfully");
     }
 
     @Override
     public List<GitDto> getAll(RepoDto repoDto) throws GitAPIException, IOException {
-      // String repoUrl = "https://github.com/Raji1707vadla/git_log_practice.git";
         try (Git git = cloneRepository(repoDto.getRepo())) {
             Iterable<RevCommit> commits = getCommits(git);
             List<GitDto> gitDtoList = new ArrayList<>();
@@ -278,7 +286,7 @@ public class ServiceImpl implements ServiceInt {
         }
     }
 
-    private  Git cloneRepository(String repoUrl) throws GitAPIException, IOException {
+    private Git cloneRepository(String repoUrl) throws GitAPIException, IOException {
         File localRepo = new File("git_log_practice");
 
         // Delete the existing directory if it exists
@@ -292,7 +300,7 @@ public class ServiceImpl implements ServiceInt {
         return cloneCommand.call();
     }
 
-    private  Iterable<RevCommit> getCommits(Git git) throws GitAPIException {
+    private Iterable<RevCommit> getCommits(Git git) throws GitAPIException {
         return git.log().call();
     }
 

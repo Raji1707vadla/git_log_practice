@@ -32,7 +32,8 @@ public class WebSecurityConfig {
             "/phone-pay/sign-up",
             "/phone-pay/get-otp/{mobile}",
             "/phone-pay/sign-in",
-            "/phone-pay/get-all-git-logs"
+            "/phone-pay/get-all-git-logs",
+            "/phone-pay/merge-code"
     };
 
     @Bean
