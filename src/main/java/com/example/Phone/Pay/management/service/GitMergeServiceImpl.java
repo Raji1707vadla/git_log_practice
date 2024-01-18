@@ -24,6 +24,8 @@ public class GitMergeServiceImpl implements GitMergeService{
     public String mergeBranches(GitCredentialsDto gitCredentialsDto) {
         try {
             try (Git git = Git.open(new File(gitCredentialsDto.getRepository()))) {
+
+                System.out.println("Hi Raju Good Morning");
                 Repository repository = git.getRepository();
 
                 System.out.println("Source Branch: " + gitCredentialsDto.getSourceBranch());
