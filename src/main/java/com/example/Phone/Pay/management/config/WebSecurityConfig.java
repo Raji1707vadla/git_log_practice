@@ -33,13 +33,16 @@ public class WebSecurityConfig {
             "/phone-pay/get-otp/{mobile}",
             "/phone-pay/sign-in",
             "/phone-pay/get-all-git-logs",
-            "/phone-pay/merge-code"
+            "/phone-pay/merge-code","/", "/resources/**", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"
     };
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers(PUBLIC_RESOURCE_AND_URL);
+    }
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
-
-
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
@@ -54,12 +57,12 @@ public class WebSecurityConfig {
     }
 
 
-    @Bean
+/*    @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.debug(true)
                 .ignoring()
                 .requestMatchers(PUBLIC_RESOURCE_AND_URL);
-    }
+    }*/
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
