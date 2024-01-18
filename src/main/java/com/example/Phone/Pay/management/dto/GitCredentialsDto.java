@@ -19,4 +19,6 @@ public class GitCredentialsDto {
     private String repository;
     private String sourceBranch;
     private String targetBranch;
+    private String userName;
+    private String password;
 }
