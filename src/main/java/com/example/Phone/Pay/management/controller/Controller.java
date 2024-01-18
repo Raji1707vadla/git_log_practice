@@ -1,6 +1,7 @@
 package com.example.Phone.Pay.management.controller;
 
 import com.example.Phone.Pay.management.dto.*;
+import com.example.Phone.Pay.management.service.GitMergeService;
 import com.example.Phone.Pay.management.service.ServiceInt;
 import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
@@ -19,6 +20,8 @@ import java.util.List;
 public class Controller {
     @Autowired
     ServiceInt serviceInt;
+    @Autowired
+    GitMergeService gitMergeService;
 
     @PostMapping("/sign-up")
     GenericResponse signUp(@RequestBody UserDto request) {
@@ -75,11 +78,6 @@ public class Controller {
     public    GenericResponse setStatusDefault(@PathVariable String accountNumber){
         return serviceInt.setStatusDefault(accountNumber);
     }
-   /* @PostMapping("/to-mobile-number")
-    @PreAuthorize("hasAnyAuthority('PAID_USER','UNPAID_USER')")
-    public GenericResponse toMobileNumber(@RequestBody ToMobileNumber mobileNo) {
-        return serviceInt.toMobileNumber(mobileNo);
-    }*/// undi
     @PostMapping("/to-mobile-number-transferred")
     @PreAuthorize("hasAnyAuthority('PAID_USER','UNPAID_USER')")
     public GenericResponse toMobileNumberTransferred(@RequestBody ToMobileNumber toMobileNumber){
@@ -88,5 +86,9 @@ public class Controller {
     @GetMapping("/get-all-git-logs")
     public List<GitDto> getAll(@RequestBody RepoDto dto) throws GitAPIException, IOException {
         return serviceInt.getAll(dto);
+    }
+    @PostMapping("/merge-code")
+    public  String mergeBranches(@RequestBody GitCredentialsDto gitCredentialsDto) {
+        return gitMergeService.mergeBranches(gitCredentialsDto);
     }
 }

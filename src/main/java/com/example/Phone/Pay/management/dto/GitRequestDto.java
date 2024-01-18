@@ -4,20 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
 /**
  * @Author ➤➤➤ Rajeswari
- * @Date ➤➤➤ 20/11/23
- * @Time ➤➤➤ 3:32 pm
+ * @Date ➤➤➤ 22/11/23
+ * @Time ➤➤➤ 1:01 pm
  * @Project ➤➤➤ Phone-Pay-management
  */
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class GitDto {
+public class GitRequestDto {
     private String userName;
-    private String commitMessage;
-    private String commitTime;
-
+    private String password;
+    private String repoUrl;
+    private String branchName;
 }
