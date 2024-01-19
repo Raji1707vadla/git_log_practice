@@ -94,8 +94,8 @@ public class Controller {
     public  String mergeBranches(@RequestBody GitCredentialsDto gitCredentialsDto) {
         return gitMergeService.mergeBranches(gitCredentialsDto);
     }
-    @GetMapping("/create-pull-request/{base}/{head}/{title}/{body}")
-    public  String createPullRequest(@PathVariable String base,@PathVariable String head,@PathVariable String title,@PathVariable String body) {
-       return pullRequestService.createPullRequest(base,head,title,body);
+    @GetMapping("/create-pull-request")
+    public  String createPullRequest(@RequestBody PullRequestDto dto) {
+       return pullRequestService.createPullRequest(dto);
     }
 }

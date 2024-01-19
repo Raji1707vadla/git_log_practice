@@ -1,5 +1,6 @@
 package com.example.Phone.Pay.management.service;
 
+import com.example.Phone.Pay.management.dto.PullRequestDto;
 import com.example.Phone.Pay.management.entity.PullRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 public interface PullRequestService {
 
 
-    String createPullRequest(String base, String head, String title, String body);
+    String createPullRequest(PullRequestDto dto);
 }
 
 

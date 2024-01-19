@@ -33,7 +33,7 @@ public class WebSecurityConfig {
             "/phone-pay/get-otp/{mobile}",
             "/phone-pay/sign-in",
             "/phone-pay/get-all-git-logs",
-            "/phone-pay/create-pull-request/{base}/{head}/{title}/{body}",
+            "/phone-pay/create-pull-request",
             "/phone-pay/merge-code","/", "/resources/**", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"
     };
     @Bean
