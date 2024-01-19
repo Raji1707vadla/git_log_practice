@@ -19,8 +19,8 @@ import org.springframework.web.client.RestTemplate;
 public class PullRequestServiceImpl implements PullRequestService{
     private static final String GITHUB_API_URL = "https://api.github.com";
     private static final String OWNER = "Raji1707vadla";
-    private static final String REPO = "https://github.com/Raji1707vadla/git_log_practice.git";
-    private static final String TOKEN = "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";
+    private static final String REPO = "git_log_practice";
+    private static final String TOKEN = "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";
 @Override
     public  String createPullRequest(PullRequestDto dto) {
         String apiUrl = String.format("%s/repos/%s/%s/pulls", GITHUB_API_URL, OWNER, REPO);
