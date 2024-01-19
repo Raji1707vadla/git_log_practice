@@ -2,6 +2,7 @@ package com.example.Phone.Pay.management.controller;
 
 import com.example.Phone.Pay.management.dto.*;
 import com.example.Phone.Pay.management.service.GitMergeService;
+import com.example.Phone.Pay.management.service.PullRequestService;
 import com.example.Phone.Pay.management.service.ServiceInt;
 import com.example.Phone.Pay.management.usage_classes.SelfTransfer;
 import com.example.Phone.Pay.management.usage_classes.SignInDetails;
@@ -22,6 +23,8 @@ public class Controller {
     ServiceInt serviceInt;
     @Autowired
     GitMergeService gitMergeService;
+    @Autowired
+    private PullRequestService pullRequestService;
 
     @PostMapping("/sign-up")
     GenericResponse signUp(@RequestBody UserDto request) {
@@ -90,5 +93,9 @@ public class Controller {
     @PostMapping("/merge-code")
     public  String mergeBranches(@RequestBody GitCredentialsDto gitCredentialsDto) {
         return gitMergeService.mergeBranches(gitCredentialsDto);
+    }
+    @GetMapping("/create-pull-request/{base}/{head}/{title}/{body}")
+    public  String createPullRequest(@PathVariable String base,@PathVariable String head,@PathVariable String title,@PathVariable String body) {
+       return pullRequestService.createPullRequest(base,head,title,body);
     }
 }

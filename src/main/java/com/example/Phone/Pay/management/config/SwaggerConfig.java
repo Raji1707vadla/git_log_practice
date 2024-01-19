@@ -32,8 +32,8 @@ public class SwaggerConfig {
     }
 
     private Info apiInfo() {
-        return new Info().title("PhonePayManagement API")
-                .description("PhonePayManagementApplication")
+        return new Info().title("Phone PayManagement API")
+                .description("Phone Pay ManagementApplication")
                 .version("v.1")
                 .license(new License().name("Apache").url(""));
     }
